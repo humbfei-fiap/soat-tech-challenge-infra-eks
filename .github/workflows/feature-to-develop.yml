@@ -1,5 +1,6 @@
 name: 'Feature -> Develop: Criar Pull Request'
-
+env:
+  ACTIONS_STEP_DEBUG: true
 on:
   push:
     branches:
@@ -19,6 +20,8 @@ jobs:
       # Passo 1: Fazer o checkout do código da branch feature
       - name: Checkout do código
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Busca todo o histórico para garantir que as alterações sejam detectadas
 
       # Passo 2: Usar a action para criar o Pull Request
       - name: Criar Pull Request
