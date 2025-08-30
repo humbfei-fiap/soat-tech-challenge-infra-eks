@@ -31,7 +31,7 @@ module "eks" {
   version = "20.8.4" # Recomendo usar a versão mais recente ou fixar uma que você testou
 
   cluster_name    = var.cluster_name
-  cluster_version = "1.29"
+  cluster_version = "1.34"
 
   vpc_id     = module.vpc.vpc_id
 

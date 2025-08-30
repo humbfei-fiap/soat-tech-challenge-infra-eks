@@ -45,5 +45,3 @@ jobs:
           # Branch de origem do PR (a própria branch feature)
           branch: ${{ github.ref_name }}
           
-          # Mantém o PR atualizado com novos commits na feature, em vez de criar vários PRs
-          update: true
