@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - 'feature/**' # Gatilho para qualquer branch que comece com 'feature/'
- 
+
 jobs:
   create-pull-request:
     name: Criar Pull Request para Develop
@@ -32,7 +32,7 @@ jobs:
           
           # Corpo do Pull Request
           body: |
-            Pull Request automático da branch `${{ github.ref_name }}`.
+            Pull Request automático da branch `${{ github.head_ref }}`.
             
             **Alterações:**
             - [ ] Descreva aqui as mudanças da sua feature.
@@ -44,4 +44,5 @@ jobs:
           
           # Branch de origem do PR (a própria branch feature)
           branch: ${{ github.ref_name }}
+          always-create: true
           
