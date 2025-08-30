@@ -12,10 +12,13 @@ jobs:
 
     # Permissões necessárias para o workflow
     permissions:
+      id-token: write  # Necessário para usar o GITHUB_TOKEN
       contents: write      # Para fazer checkout do código
       pull-requests: write # Para criar o Pull Request
 
+
     steps:
+    
       # 1. Faz o checkout do código da sua branch
       - name: 'Checkout code'
         uses: actions/checkout@v4
@@ -27,7 +30,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           # Opcional: Especifique a versão do Terraform que você usa
-          terraform_version: 1.5.0
+          terraform_version: 1.5.7
 
       # 3. Verifica a formatação do código Terraform
       # O '-check' faz o passo falhar se o código não estiver formatado
@@ -39,18 +42,21 @@ jobs:
       # 4. Inicializa o Terraform para baixar providers
       - name: 'Terraform Init'
         id: init
-        run: terraform init
+        run: terraform -chdir=./terraform init
+        #run: terraform init
 
       # 5. Valida a sintaxe do código Terraform
       - name: 'Terraform Validate'
         id: validate
-        run: terraform validate
+        run: terraform -chdir=./terraform validate
+        #run: terraform validate
 
       # 6. Gera um plano de execução para garantir que não há erros
       # -input=false é crucial para automação
       - name: 'Terraform Plan'
         id: plan
-        run: terraform plan -input=false -no-color
+        run: terraform -chdir=./terraform plan -input=false -no-color
+        #run: terraform plan -input=false -no-color 
 
       # 7. Cria o Pull Request se todos os passos anteriores tiveram sucesso
       - name: 'Create Pull Request'
