@@ -44,4 +44,5 @@ jobs:
           
           # Branch de origem do PR (a própria branch feature)
           branch: ${{ github.ref_name }}
+          always-create: true
           
