@@ -28,7 +28,7 @@ jobs:
       - name: Configurar credenciais AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::123456789012:role/GitHubActions-EKS-Deploy-Role # <-- SUBSTITUA PELO ARN DO SEU ROLE
+          role-to-assume: arn:aws:iam::239409137076:role/role-eks-fiap # <-- SUBSTITUA PELO ARN DO SEU ROLE
           aws-region: us-east-1 # <-- SUBSTITUA PELA SUA REGIÃO
 
       # 3. Setup do Terraform
