@@ -1,0 +1,87 @@
+# name: 'Feature -> Develop: Criar Pull Request'
+
+# on:
+#   push:
+#     branches:
+#       - 'feature/**' # Gatilho para qualquer branch que comece com 'feature/'
+# jobs:
+#   create-pull-request:
+#     name: Criar Pull Request para Develop
+#     runs-on: ubuntu-latest
+    
+#     # Permissões necessárias para a action criar um PR
+#     permissions:
+#       contents: write
+#       pull-requests: write
+
+#     steps:
+#       # Passo 1: Fazer o checkout do código da branch feature
+#       - name: Checkout do código
+#         uses: actions/checkout@v4
+
+#       # Passo 2: Usar a action para criar o Pull Request
+#       - name: Criar Pull Request
+#         uses: peter-evans/create-pull-request@v6
+#         with:
+#           # O GITHUB_TOKEN é um token gerado automaticamente pelo GitHub com permissões para o repo
+#           token: ${{ secrets.GITHUB_TOKEN }}
+          
+#           # Título do Pull Request (usa o nome da branch feature)
+#           title: 'Feature: ${{ github.ref_name }}'
+          
+#           # Corpo do Pull Request
+#           body: |
+#             Pull Request automático da branch `${{ github.head_ref }}`.
+            
+#             **Alterações:**
+#             - [ ] Descreva aqui as mudanças da sua feature.
+
+#             Por favor, revise e aprove o merge para a branch `develop`.
+          
+#           # Branch de destino do PR
+#           base: develop
+          
+#           # Branch de origem do PR (a própria branch feature)
+#           branch: ${{ github.ref_name }}
+
+# # jobs:
+# #   create-pull-request:
+# #     name: Criar Pull Request para Develop
+# #     runs-on: ubuntu-latest
+    
+# #     # Permissões necessárias para a action criar um PR
+# #     permissions:
+# #       contents: write
+# #       pull-requests: write
+
+# #     steps:
+# #       # Passo 1: Fazer o checkout do código da branch feature
+# #       - name: Checkout do código
+# #         uses: actions/checkout@v4
+
+# #       # Passo 2: Usar a action para criar o Pull Request
+# #       - name: Criar Pull Request
+# #         uses: peter-evans/create-pull-request@v6
+# #         with:
+# #           # O GITHUB_TOKEN é um token gerado automaticamente pelo GitHub com permissões para o repo
+# #           token: ${{ secrets.GITHUB_TOKEN }}
+          
+# #           # Título do Pull Request (usa o nome da branch feature)
+# #           title: 'Feature: ${{ github.ref_name }}'
+          
+# #           # Corpo do Pull Request
+# #           body: |
+# #             Pull Request automático da branch `${{ github.head_ref }}`.
+            
+# #             **Alterações:**
+# #             - [ ] Descreva aqui as mudanças da sua feature.
+
+# #             Por favor, revise e aprove o merge para a branch `develop`.
+          
+# #           # Branch de destino do PR
+# #           base: develop
+          
+# #           # Branch de origem do PR (a própria branch feature)
+# #           branch: ${{ github.ref_name }}
+
+          
