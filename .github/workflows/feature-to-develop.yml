@@ -32,7 +32,7 @@ jobs:
           
           # Corpo do Pull Request
           body: |
-            Pull Request automático da branch `${{ github.ref_name }}`.
+            Pull Request automático da branch `${{ github.head_ref }}`.
             
             **Alterações:**
             - [ ] Descreva aqui as mudanças da sua feature.
