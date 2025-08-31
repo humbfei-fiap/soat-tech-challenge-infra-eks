@@ -36,10 +36,11 @@ jobs:
       - name: 'Setup Terraform'
         uses: hashicorp/setup-terraform@v3
         with:
-
           # Alinhado com a versão do workflow de deploy para consistência
           terraform_version: 1.6.0
-
+      # 3.9 corrige o formato
+      - name: 'Terraform Format'
+        run: terraform -chdir=./terraform fmt -recursive
       # 4. Verifica a formatação do código Terraform
       
       - name: 'Terraform Format Check'

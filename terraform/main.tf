@@ -34,7 +34,7 @@ module "eks" {
   cluster_version = "1.30"
   vpc_id          = module.vpc.vpc_id
   subnet_ids      = module.vpc.private_subnets
-  
+
   eks_managed_node_groups = {
     # Define um node group. A chave "default" identifica este grupo no mapa.
     default = {
@@ -49,5 +49,4 @@ module "eks" {
       }
     }
   }
-
 }
