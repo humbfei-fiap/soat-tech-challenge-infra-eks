@@ -32,24 +32,25 @@ module "eks" {
 
   eks = {
     cluster_name    = var.cluster_name
-    cluster_version = "1.33"
+    cluster_version = "1.30"
   }
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
   
   eks_managed_node_groups = {
-    one = {
+
       name           = "${var.cluster_name}-node-group"
       instance_types = var.instance_types
       min_size       = var.min_size
       max_size       = var.max_size
       desired_size   = var.desired_size
-    }
+
       tags = {
         Environment = "dev"
         Terraform   = "true"
+      }
   }
-  }
+
 }
 

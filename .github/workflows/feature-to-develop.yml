@@ -12,7 +12,7 @@ jobs:
 
     # Permissões necessárias para o workflow
     permissions:
-      id-token: write  # Necessário para usar o GITHUB_TOKEN
+      id-token: write  # Necessário para autenticação com alguns provedores
       contents: write      # Para fazer checkout do código
       pull-requests: write # Para criar o Pull Request
 
@@ -25,41 +25,48 @@ jobs:
         with:
           fetch-depth: 0 # Busca todo o histórico para garantir que as alterações sejam detectadas
 
-      # 2. Configura o ambiente Terraform
+      # 2. Configura Autenticação AWS com OIDC (necessário para o 'plan')
+      - name: Configurar credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::239409137076:role/role-eks-fiap # <-- SUBSTITUA PELO ARN DO SEU ROLE
+          aws-region: us-east-1 # <-- SUBSTITUA PELA SUA REGIÃO
+
+      # 3. Configura o ambiente Terraform
       - name: 'Setup Terraform'
         uses: hashicorp/setup-terraform@v3
         with:
-          # Opcional: Especifique a versão do Terraform que você usa
-          terraform_version: 1.5.7
 
-      # 3. Verifica a formatação do código Terraform
-      # O '-check' faz o passo falhar se o código não estiver formatado
+          # Alinhado com a versão do workflow de deploy para consistência
+          terraform_version: 1.6.0
+
+      # 4. Verifica a formatação do código Terraform
+      
       - name: 'Terraform Format Check'
         id: fmt
-        run: terraform fmt -check -recursive
-        continue-on-error: false
+        run: terraform -chdir=./terraform fmt -check -recursive
 
-      # 4. Inicializa o Terraform para baixar providers
+      # 5.1 Inicializa o Terraform para baixar providers
       - name: 'Terraform Init'
         id: init
         run: terraform -chdir=./terraform init
-        #run: terraform init
+        #run: terraform validate
 
-      # 5. Valida a sintaxe do código Terraform
+      # 5.2 Valida a sintaxe do código Terraform
       - name: 'Terraform Validate'
         id: validate
         run: terraform -chdir=./terraform validate
-        #run: terraform validate
 
       # 6. Gera um plano de execução para garantir que não há erros
-      # -input=false é crucial para automação
+  
       - name: 'Terraform Plan'
         id: plan
         run: terraform -chdir=./terraform plan -input=false -no-color
-        #run: terraform plan -input=false -no-color 
+  
 
       # 7. Cria o Pull Request se todos os passos anteriores tiveram sucesso
       - name: 'Create Pull Request'
+        id: crp
         uses: peter-evans/create-pull-request@v6
         with:
           # O GITHUB_TOKEN é gerado automaticamente pelo GitHub Actions
