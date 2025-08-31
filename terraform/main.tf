@@ -39,18 +39,18 @@ module "eks" {
   subnet_ids = module.vpc.private_subnets
   
   eks_managed_node_groups = {
-
+    # Define um node group. A chave "default" identifica este grupo no mapa.
+    default = {
       name           = "${var.cluster_name}-node-group"
       instance_types = var.instance_types
       min_size       = var.min_size
       max_size       = var.max_size
       desired_size   = var.desired_size
-
       tags = {
         Environment = "dev"
         Terraform   = "true"
       }
+    }
   }
 
 }
-
