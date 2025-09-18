@@ -1,53 +1,49 @@
-# Módulo para criar a VPC para o EKS
-module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "5.1.2"
-
-  name = "${var.cluster_name}-vpc"
-  cidr = var.vpc_cidr_block
-
-  azs             = ["${var.region}a", "${var.region}b", "${var.region}c"]
-  private_subnets = var.private_subnet_cidr_blocks
-  public_subnets  = var.public_subnet_cidr_blocks
-
-  enable_nat_gateway   = true
-  single_nat_gateway   = true
+resource "aws_vpc" "soat_tech_challenge_vpc" {
+  cidr_block = "10.0.0.0/16" # This is the CIDR block for the VPC.
+  enable_dns_support = true
   enable_dns_hostnames = true
 
-  public_subnet_tags = {
-    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
-    "kubernetes.io/role/elb"                    = "1"
-  }
-
-  private_subnet_tags = {
-    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
-    "kubernetes.io/role/internal-elb"           = "1"
+  tags = {
+    Name = "soat-tech-challenge-vpc"
   }
 }
 
-# Módulo para criar o Cluster EKS
-module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "21.1.5" # Recomendo usar a versão mais recente ou fixar uma que você testou
+resource "aws_subnet" "soat_tech_challenge_public_subnet_1" {
+  vpc_id = aws_vpc.soat_tech_challenge_vpc.id
+  cidr_block = "10.0.1.0/24"
+  availability_zone = "us-east-1a"
+  map_public_ip_on_launch = true
 
-  cluster_name    = var.cluster_name
-  cluster_version = "1.33"
-
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.private_subnets
-  
-  eks_managed_node_groups = {
-    one = {
-      name           = "${var.cluster_name}-node-group"
-      instance_types = var.instance_types
-      min_size       = var.min_size
-      max_size       = var.max_size
-      desired_size   = var.desired_size
-    }
-      tags = {
-        Environment = "dev"
-        Terraform   = "true"
-  }
+  tags = {
+    Name = "soat-tech-challenge-public-subnet-1"
   }
 }
 
+resource "aws_subnet" "soat_tech_challenge_public_subnet_2" {
+  vpc_id = aws_vpc.soat_tech_challenge_vpc.id
+  cidr_block = "10.0.2.0/24"
+  availability_zone = "us-east-1b"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "soat-tech-challenge-public-subnet-2"
+  }
+}
+
+resource "aws_subnet" "soat_tech_challenge_private_subnet_1" {
+  vpc_id = aws_vpc.soat_tech_challenge_vpc.id
+  cidr_block = "10.0.3.0/24"
+  availability_zone = "us-east-1a"
+
+  tags = {
+    Name = "soat-tech-challenge-private-subnet-1"
+  }
+}
+
+resource "aws_subnet" "soat_tech_challenge_private_subnet_2" {
+  vpc_id = aws_vpc.soat_tech_challenge_vpc.id
+  cidr_block = "10.0.4.0/24"
+  availability_zone = "us-east-1b"
+
+  tags = {
+    Name = "soat-tech-challenge-private-subnet

@@ -1,5 +1,5 @@
 output "cluster_name" {
-  value = module.eks.cluster_name
+  value = module.eks.cluster_id
 }
 
 output "cluster_endpoint" {
@@ -20,8 +20,4 @@ output "region" {
 
 output "cluster_oidc_issuer_url" {
   value = module.eks.cluster_oidc_issuer_url
-}
-
-output "cluster_oidc_issuer_arn" {
-  value = module.eks.cluster_oidc_issuer_arn
 }
