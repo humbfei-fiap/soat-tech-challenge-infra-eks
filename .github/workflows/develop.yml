@@ -14,7 +14,7 @@ jobs:
     uses: ./.github/workflows/terraform.yml
     with:
       environment: "dev"
-      aws-assume-role-arn: "arn:aws:iam::123456789012:role/github-actions-role"
+      aws-assume-role-arn: "arn:aws:iam::239409137076:role/role-eks-fiap"
       aws-region: "sa-east-1"
       aws-statefile-s3-bucket: "soat-tech-challenge-tfstate"
       aws-lock-dynamodb-table: "soat-tech-challenge-tflock"
