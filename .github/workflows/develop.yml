@@ -1,0 +1,57 @@
+name: 'Deploy EKS Cluster with Terraform'
+
+on:
+  push:
+    branches:
+      - main # Roda o apply quando houver push na main
+  pull_request: # Roda apenas o plan para pull requests
+
+permissions:
+  id-token: write # Permissão para o workflow obter um OIDC token
+  contents: read  # Permissão para o workflow ler o repositório
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./terraform # Indica que os comandos devem rodar na pasta terraform
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::239409137076:role/role-eks-fiap # SUBSTITUA
+          aws-region: us-east-1 # SUBSTITUA
+          audience: sts.amazonaws.com
+      - name: Debug OIDC Token
+        run: echo "OIDC Token: ${{ steps.configure-aws-credentials.outputs.oidc-token }}"
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.7
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -input=false
+        # Se for um PR, o workflow para aqui após o plan.
+        
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false

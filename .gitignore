@@ -1,0 +1,9 @@
+
+# Soat Tech Challenge Infra EKS
+
+.idea/
+.gradle/
+build/
+.DS_Store
+.terraform
+.terraform.lock.hcl
