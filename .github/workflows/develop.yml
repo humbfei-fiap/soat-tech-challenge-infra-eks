@@ -1,20 +1,53 @@
-name: "DEV DEPLOY"
+name: 'Deploy EKS Cluster with Terraform'
 
 on:
   push:
     branches:
-      - develop
+      - main # Roda o apply quando houver push na main
+  pull_request: # Roda apenas o plan para pull requests
 
 permissions:
-  id-token: write
-  contents: read
+  id-token: write # Permissão para o workflow obter um OIDC token
+  contents: read  # Permissão para o workflow ler o repositório
 
 jobs:
   terraform:
-    uses: ./.github/workflows/terraform.yml
-    with:
-      environment: "dev"
-      aws-assume-role-arn: "arn:aws:iam::239409137076:role/role-eks-fiap"
-      aws-region: "sa-east-1"
-      aws-statefile-s3-bucket: "soat-tech-challenge-tfstate"
-      aws-lock-dynamodb-table: "soat-tech-challenge-tflock"
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./terraform # Indica que os comandos devem rodar na pasta terraform
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::239409137076:role/role-eks-fiap # SUBSTITUA
+          aws-region: us-east-1 # SUBSTITUA
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.7
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -input=false
+        # Se for um PR, o workflow para aqui após o plan.
+        
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false
