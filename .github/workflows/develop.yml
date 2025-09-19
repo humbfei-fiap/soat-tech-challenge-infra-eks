@@ -30,6 +30,9 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::239409137076:role/role-eks-fiap # SUBSTITUA
           aws-region: us-east-1 # SUBSTITUA
+          audience: sts.amazonaws.com
+      - name: Debug OIDC Token
+        run: echo "OIDC Token: ${{ steps.configure-aws-credentials.outputs.oidc-token }}"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
