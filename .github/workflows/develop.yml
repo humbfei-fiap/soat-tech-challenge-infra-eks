@@ -17,14 +17,17 @@ permissions:
   contents: read  # Permissão para o workflow ler o repositório
 
 # Garante que apenas uma instância deste workflow seja executada por vez para a mesma branch.
-# Se um novo commit for enviado, a execução anterior é cancelada. Isso previne 'state locks'.
+# A alteração para um grupo estático garante que NENHUMA operação de terraform (plan, apply, destroy)
+# deste workflow rode em paralelo, independentemente da branch. Isso resolve o erro de 'state lock'.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: terraform-state-lock
   cancel-in-progress: true
 
 jobs:
   terraform:
     name: 'Terraform Plan/Apply'
+    # Garante que este job não rode se for um acionamento manual para destruir.
+    if: github.event.inputs.enable_destroy != 'true'
     runs-on: ubuntu-latest
     
     defaults:
@@ -69,6 +72,11 @@ jobs:
 
   destroy:
     name: 'Terraform Destroy'
+    # Adiciona uma camada de proteção com aprovação manual obrigatória.
+    environment:
+      name: 'production'
+      # O URL aponta para a execução do workflow para fácil acesso
+      url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.enable_destroy == 'true'
     runs-on: ubuntu-latest
 
@@ -97,6 +105,5 @@ jobs:
         id: validate
         run: terraform validate -no-color
       - name: Terraform Destroy
-        id: destroy
         run: terraform destroy -auto-approve -input=false
         
