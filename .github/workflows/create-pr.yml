@@ -19,7 +19,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-            fetch-depth: 0 # Busca todo o histórico para gerar a lista de commits
+          fetch-depth: 0 # Busca todo o histórico para gerar a lista de commits
+
+      - name: Ensure labels exist in repository
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "automacao" --description "Pull Request criado por automação" --color "c5def5" || echo "Label 'automacao' já existe."
+          gh label create "para-revisao" --description "PR pronto para revisão" --color "fbca04" || echo "Label 'para-revisao' já existe."
+
       # Este passo usa a CLI oficial do GitHub para criar o PR.
       # É a forma mais robusta e correta de realizar esta automação.
       - name: Create Pull Request if it does not exist
