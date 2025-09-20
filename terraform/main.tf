@@ -1,4 +1,15 @@
 ################################################################################
+# LOCALS
+# Define valores locais para evitar repetição e garantir consistência.
+################################################################################
+
+locals {
+  # Garante que o nome base do cluster não contenha o sufixo "-cluster",
+  # evitando duplicação, já que o módulo EKS o adiciona.
+  cluster_name = trimsuffix(var.cluster_name, "-cluster")
+}
+
+################################################################################
 # MÓDULO DE REDE (VPC)
 # Cria a VPC, subnets (públicas e privadas), NAT Gateway, etc.
 ################################################################################
@@ -7,7 +18,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.1.2" # Use uma versão específica para evitar quebras inesperadas
 
-  name = "${var.cluster_name}-vpc"
+  name = "${local.cluster_name}-vpc"
   cidr = var.vpc_cidr
 
   azs             = ["${var.aws_region}a", "${var.aws_region}b", "${var.aws_region}c"]
@@ -20,12 +31,12 @@ module "vpc" {
 
   # Tags essenciais para que o EKS e os Load Balancers encontrem os recursos de rede corretos
   public_subnet_tags = {
-    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
     "kubernetes.io/role/elb"                  = "1"
   }
 
   private_subnet_tags = {
-    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
     "kubernetes.io/role/internal-elb"         = "1"
   }
 }
@@ -36,12 +47,12 @@ module "vpc" {
 ################################################################################
 
 resource "aws_kms_key" "eks_secrets" {
-  description             = "Chave KMS para criptografar secrets do cluster EKS ${var.cluster_name}"
+  description             = "Chave KMS para criptografar secrets do cluster EKS ${local.cluster_name}"
   deletion_window_in_days = 7
   enable_key_rotation     = true
   
   tags = {
-    Name = "${var.cluster_name}-secrets-key"
+    Name = "${local.cluster_name}-secrets-key"
   }
 }
 
@@ -54,7 +65,7 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "19.16.0" # Use uma versão específica
 
-  cluster_name    = var.cluster_name
+  cluster_name    = local.cluster_name
   cluster_version = "1.28"
 
   # Associa o cluster com a VPC criada pelo módulo "vpc"

@@ -31,8 +31,10 @@ jobs:
           role-to-assume: arn:aws:iam::239409137076:role/role-eks-fiap # SUBSTITUA
           aws-region: us-east-1 # SUBSTITUA
           audience: sts.amazonaws.com
-      - name: Debug OIDC Token
-        run: echo "OIDC Token: ${{ steps.configure-aws-credentials.outputs.oidc-token }}"
+      - name: DEBUG - Verify AWS Identity and List S3 Buckets
+        run: 
+          aws s3 ls # Comando para listar buckets S3 e verificar credenciais.
+
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -49,9 +51,9 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -input=false
+        run: terraform plan -no-color -input=false -out=tfplan
         # Se for um PR, o workflow para aqui após o plan.
         
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
+        run: terraform apply -auto-approve -input=false tfplan
