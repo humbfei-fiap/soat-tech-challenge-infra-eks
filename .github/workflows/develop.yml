@@ -16,6 +16,12 @@ permissions:
   id-token: write # Permissão para o workflow obter um OIDC token
   contents: read  # Permissão para o workflow ler o repositório
 
+# Garante que apenas uma instância deste workflow seja executada por vez para a mesma branch.
+# Se um novo commit for enviado, a execução anterior é cancelada. Isso previne 'state locks'.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   terraform:
     name: 'Terraform Plan/Apply'
