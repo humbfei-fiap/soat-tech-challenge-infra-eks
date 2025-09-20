@@ -54,11 +54,11 @@ module "eks" {
 }
 
 # Chave KMS para criptografar os Secrets do Kubernetes
-resource "aws_kms_key" "eks_secrets" {
-  description             = "Chave KMS para criptografar secrets do EKS"
-  deletion_window_in_days = 7
-  enable_key_rotation     = true
-}
+#resource "aws_kms_key" "eks_secrets" {
+#  description             = "Chave KMS para criptografar secrets do EKS"
+#  deletion_window_in_days = 7
+#  enable_key_rotation     = true
+#}
 
 # Output para configurar o kubectl depois
 output "cluster_name" {
