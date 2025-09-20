@@ -11,7 +11,7 @@ on:
         description: 'Marque para habilitar o job de destruição. CUIDADO: Isso deletará todos os recursos.'
         required: true
         type: boolean
-        default: false
+        default: true
 permissions:
   id-token: write # Permissão para o workflow obter um OIDC token
   contents: read  # Permissão para o workflow ler o repositório
