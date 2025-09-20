@@ -38,16 +38,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::239409137076:role/role-eks-fiap # SUBSTITUA
-          aws-region: us-east-1 # SUBSTITUA
+          role-to-assume: arn:aws:iam::239409137076:role/role-eks-fiap
+          aws-region: us-east-1
           audience: sts.amazonaws.com
-
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
