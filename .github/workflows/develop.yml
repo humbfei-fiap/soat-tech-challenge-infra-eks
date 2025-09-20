@@ -31,6 +31,10 @@ jobs:
           role-to-assume: arn:aws:iam::239409137076:role/role-eks-fiap # SUBSTITUA
           aws-region: us-east-1 # SUBSTITUA
           audience: sts.amazonaws.com
+      - name: DEBUG - Verify AWS Identity and List S3 Buckets
+        run: |
+          aws sts get-caller-identity
+          aws s3 ls
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
