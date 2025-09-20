@@ -9,7 +9,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "meu-eks-terraform-state " # SUBSTITUA
+    bucket         = "meu-eks-terraform-state" # SUBSTITUA
     key            = "global/eks/terraform.tfstate"
     region         = "us-east-1" # SUBSTITUA
     dynamodb_table = "meu-eks-terraform-lock" # SUBSTITUA
