@@ -1,0 +1,33 @@
+name: 'Create Pull Request'
+
+on:
+  push:
+    branches:
+      - 'feature/**' # Aciona o workflow em qualquer branch que comece com "feature/"
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          # O GITHUB_TOKEN é criado automaticamente pelo GitHub.
+          # Ele tem permissões para criar o PR no repositório.
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # Título do Pull Request. Usa o nome da branch para clareza.
+          title: "feat: PR da branch ${{ github.ref_name }}"
+          # Corpo do Pull Request. Você pode customizar esta mensagem.
+          body: |
+            Este PR foi criado automaticamente pela nossa automação.
+            - **Branch de origem**: `${{ github.ref_name }}`
+            - **Autor do último commit**: `@${{ github.actor }}`
+            
+            Por favor, revise as alterações.
+          # Branch de destino do PR
+          base: main
+          # Adiciona labels ao PR para facilitar a organização
+          labels: automacao, para-revisao

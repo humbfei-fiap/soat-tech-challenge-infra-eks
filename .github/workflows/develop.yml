@@ -11,7 +11,7 @@ on:
         description: 'Marque para habilitar o job de destruição. CUIDADO: Isso deletará todos os recursos.'
         required: true
         type: boolean
-        default: true
+        default: false
 permissions:
   id-token: write # Permissão para o workflow obter um OIDC token
   contents: read  # Permissão para o workflow ler o repositório
@@ -89,8 +89,7 @@ jobs:
         run: terraform init
       - name: Terraform Validate
         id: validate
-        run: terraform
-          validate -no-color
+        run: terraform validate -no-color
       - name: Terraform Destroy
         id: destroy
         run: terraform destroy -auto-approve -input=false
