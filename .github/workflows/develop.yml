@@ -39,7 +39,7 @@ jobs:
 
       - name: Terraform Init
         id: init
-        run: terraform init fmt -check
+        run: terraform init
 
       - name: Terraform Validate
         id: validate
@@ -47,9 +47,9 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -input=false
+        run: terraform plan -no-color -input=false -out=tfplan
         # Se for um PR, o workflow para aqui após o plan.
         
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
+        run: terraform apply -auto-approve -input=false tfplan
