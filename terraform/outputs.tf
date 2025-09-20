@@ -1,13 +1,4 @@
-# This output block defines the `cluster_name` output variable, which retrieves the value of the EKS cluster ID 
-# from the `eks` module. This output can be used to reference the cluster name in other Terraform configurations 
-# or for external integrations.
-#output "cluster_name" {
-#  value = module.eks.cluster_id
-#}
 
-output "cluster_endpoint" {
-  value = module.eks.cluster_endpoint
-}
 
 output "cluster_certificate_authority_data" {
   value = module.eks.cluster_certificate_authority_data
