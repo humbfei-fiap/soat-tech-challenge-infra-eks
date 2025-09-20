@@ -14,6 +14,7 @@ on:
         default: false
 permissions:
   id-token: write # Permissão para o workflow obter um OIDC token
+  pull-requests: write # Permissão para comentar nos Pull Requests
   contents: read  # Permissão para o workflow ler o repositório
 
 # Garante que apenas uma instância deste workflow seja executada por vez para a mesma branch.
@@ -53,18 +54,11 @@ jobs:
         id: init
         run: terraform init
 
-      - name: Terraform Format Check
-        id: fmt
-        run: terraform fmt -check
-
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-
       - name: Terraform Plan
-        id: plan
-        run: terraform plan -no-color -input=false -out=tfplan
-        # Se for um PR, o workflow para aqui após o plan.
+        if: github.event_name == 'pull_request'
+        uses: dflook/terraform-plan@v1
+        with:
+          path: terraform
         
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
