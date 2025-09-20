@@ -37,17 +37,20 @@ jobs:
             # Gera uma lista de commits para adicionar ao corpo do PR
             COMMIT_LOG=$(git log main.."$BRANCH_NAME" --oneline --pretty=format:"- %s")
 
-            # Constrói o corpo do PR de forma segura para evitar problemas com here-docs em YAML
-            PR_BODY="Este PR foi criado automaticamente. Por favor, revise as alterações.
-
-### Commits nesta branch:
-$COMMIT_LOG"
+            # Para evitar problemas de sintaxe com YAML e shell, a melhor prática é
+            # escrever o corpo do PR em um arquivo e passá-lo para a CLI do GitHub.
+            {
+              echo "Este PR foi criado automaticamente. Por favor, revise as alterações."
+              echo ""
+              echo "### Commits nesta branch:"
+              echo "$COMMIT_LOG"
+            } > PR_BODY.md
 
             gh pr create \
               --base main \
               --head "$BRANCH_NAME" \
               --title "feat: PR da branch ${{ github.ref_name }}" \
-              --body "$PR_BODY" \
+              --body-file PR_BODY.md \
               --label "automacao,para-revisao"
           else
             echo "Um PR (#$existing_pr) já existe para a branch $BRANCH_NAME. Nada a fazer."
