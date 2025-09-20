@@ -9,7 +9,7 @@ output "cluster_security_group_id" {
 }
 
 output "region" {
-  value = var.region
+  value = var.aws_region
 }
 
 output "cluster_oidc_issuer_url" {
