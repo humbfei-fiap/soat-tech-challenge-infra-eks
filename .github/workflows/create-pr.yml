@@ -14,6 +14,13 @@ jobs:
   create-pull-request:
     runs-on: ubuntu-latest
     steps:
+      # É necessário fazer o checkout do código para que a CLI do GitHub
+      # tenha o contexto do repositório e do histórico de commits.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Busca todo o histórico para gerar a lista de commits
+
       # Este passo usa a CLI oficial do GitHub para criar o PR.
       # É a forma mais robusta e correta de realizar esta automação.
       - name: Create Pull Request if it does not exist
@@ -27,12 +34,23 @@ jobs:
           
           if [ -z "$existing_pr" ]; then
             echo "Nenhum PR encontrado para a branch $BRANCH_NAME. Criando um novo PR."
-            gh pr create \
-              --base main \
-              --head "$BRANCH_NAME" \
-              --title "feat: PR da branch ${{ github.ref_name }}" \
-              --body "Este PR foi criado automaticamente. Por favor, revise as alterações." \
-              --label "automacao,para-revisao"
+            
+            # Gera uma lista de commits para adicionar ao corpo do PR
+            COMMIT_LOG=$(git log main.."$BRANCH_NAME" --oneline --pretty=format:"- %s")
+            PR_BODY=$(cat <<EOF
+                Este PR foi criado automaticamente. Por favor, revise as alterações.
+
+                ### Commits nesta branch:
+                $COMMIT_LOG
+                EOF
+                )
+
+                            gh pr create \
+                            --base main \
+                            --head "$BRANCH_NAME" \
+                            --title "feat: PR da branch ${{ github.ref_name }}" \
+                            --body "$PR_BODY" \
+                            --label "automacao,para-revisao"
           else
             echo "Um PR (#$existing_pr) já existe para a branch $BRANCH_NAME. Nada a fazer."
           fi
