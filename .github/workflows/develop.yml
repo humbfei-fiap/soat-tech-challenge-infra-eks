@@ -32,9 +32,9 @@ jobs:
           aws-region: us-east-1 # SUBSTITUA
           audience: sts.amazonaws.com
       - name: DEBUG - Verify AWS Identity and List S3 Buckets
-        run: |
-          aws sts get-caller-identity
-          aws s3 ls
+        run: 
+          aws s3 ls # Comando para listar buckets S3 e verificar credenciais.
+
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
