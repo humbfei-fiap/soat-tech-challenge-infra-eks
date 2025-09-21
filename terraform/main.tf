@@ -69,6 +69,7 @@ module "eks" {
   # A versão 1.32 ainda não está disponível no EKS.
   # Usando a versão estável mais recente (1.29).
   cluster_version = "1.29"
+  #OK
 
   # Associa o cluster com a VPC criada pelo módulo "vpc"
   vpc_id     = module.vpc.vpc_id
