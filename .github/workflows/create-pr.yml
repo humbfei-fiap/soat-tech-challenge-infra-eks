@@ -3,7 +3,8 @@ name: 'Create Pull Request'
 on:
   push:
     branches:
-      - 'feature/**' # Aciona o workflow em qualquer branch que comece com "feature/"
+      - 'hostfix/*'
+#      - 'feature/**' # Aciona o workflow em qualquer branch que comece com "feature/"
 
 permissions:
   pull-requests: write # Permite criar e gerenciar PRs  
