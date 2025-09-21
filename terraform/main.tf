@@ -21,9 +21,9 @@ module "vpc" {
   name = "${local.cluster_name}-vpc"
   cidr = var.vpc_cidr
 
-  azs             = ["${var.aws_region}a", "${var.aws_region}b", "${var.aws_region}c"]
-  private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+  azs             = ["${var.aws_region}a", "${var.aws_region}b"]
+  private_subnets = var.private_subnet_cidrs
+  public_subnets  = var.public_subnet_cidrs
 
   enable_nat_gateway   = true
   single_nat_gateway   = true # Use 'false' para alta disponibilidade em produção
@@ -66,7 +66,9 @@ module "eks" {
   version = "19.16.0" # Use uma versão específica
 
   cluster_name    = local.cluster_name
-  cluster_version = "1.28"
+  # A versão 1.32 ainda não está disponível no EKS.
+  # Usando a versão estável mais recente (1.29).
+  cluster_version = "1.29"
 
   # Associa o cluster com a VPC criada pelo módulo "vpc"
   vpc_id     = module.vpc.vpc_id
@@ -97,18 +99,16 @@ module "eks" {
   eks_managed_node_group_defaults = {
     # Imagem otimizada para EKS com hardening de segurança da AWS
     ami_type                    = "AL2_x86_64"
-    # Não atribui IPs públicos aos nós de trabalho
-    associate_public_ip_address = false
     # Garante que os nós sejam criados apenas nas subnets privadas
     subnet_ids                  = module.vpc.private_subnets
   }
 
   eks_managed_node_groups = {
     default_nodes = {
-      instance_types = ["t3.medium"]
-      min_size       = 2
-      max_size       = 4
-      desired_size   = 2
+      instance_types = var.instance_types
+      min_size       = var.min_size
+      max_size       = var.max_size
+      desired_size   = var.desired_size
     }
   }
 

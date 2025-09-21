@@ -5,29 +5,66 @@ on:
     branches:
       - 'feature/**' # Aciona o workflow em qualquer branch que comece com "feature/"
 
+permissions:
+  pull-requests: write # Permite criar e gerenciar PRs  
+  contents: read
+
+
 jobs:
   create-pull-request:
     runs-on: ubuntu-latest
     steps:
+              # É necessário fazer o checkout do código para que a CLI do GitHub
+      # tenha o contexto do repositório e do histórico de commits.
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
         with:
-          # O GITHUB_TOKEN é criado automaticamente pelo GitHub.
-          # Ele tem permissões para criar o PR no repositório.
-          token: ${{ secrets.GITHUB_TOKEN }}
-          # Título do Pull Request. Usa o nome da branch para clareza.
-          title: "feat: PR da branch ${{ github.ref_name }}"
-          # Corpo do Pull Request. Você pode customizar esta mensagem.
-          body: |
-            Este PR foi criado automaticamente pela nossa automação.
-            - **Branch de origem**: `${{ github.ref_name }}`
-            - **Autor do último commit**: `@${{ github.actor }}`
+          fetch-depth: 0 # Busca todo o histórico para gerar a lista de commits
+      - name: Fetch all branches
+        run: git fetch --all
+      - name: Ensure labels exist in repository
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "automacao" --description "Pull Request criado por automação" --color "c5def5" || echo "Label 'automacao' já existe."
+          gh label create "para-revisao" --description "PR pronto para revisão" --color "fbca04" || echo "Label 'para-revisao' já existe."
+
+
+      # Este passo usa a CLI oficial do GitHub para criar o PR.
+      # É a forma mais robusta e correta de realizar esta automação.
+      - name: Create Pull Request if it does not exist
+      
+        env:
+          # O GITHUB_TOKEN com as permissões definidas acima é passado para a CLI.
+          GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          BRANCH_NAME: ${{ github.ref_name }}
+  
+        run: |
+          # Primeiro, verificamos se já existe um PR aberto para esta branch para evitar erros.
+          existing_pr=$(gh pr list --head "$BRANCH_NAME" --json number -q '.[0].number')
+          
+          if [ -z "$existing_pr" ]; then
+            echo "Nenhum PR encontrado para a branch $BRANCH_NAME. Criando um novo PR."
             
-            Por favor, revise as alterações.
-          # Branch de destino do PR
-          base: main
-          # Adiciona labels ao PR para facilitar a organização
-          labels: automacao, para-revisao
+            # Gera uma lista de commits para adicionar ao corpo do PR
+            # Compara com 'origin/main' para garantir que a referência da branch base exista no runner.
+            COMMIT_LOG=$(git log origin/main.."$BRANCH_NAME" --oneline --pretty=format:"- %s")
+
+            # Para evitar problemas de sintaxe com YAML e shell, a melhor prática é
+            # escrever o corpo do PR em um arquivo e passá-lo para a CLI do GitHub.
+            {
+              echo "Este PR foi criado automaticamente. Por favor, revise as alterações."
+              echo ""
+              echo "### Commits nesta branch:"
+              echo "$COMMIT_LOG"
+            } > PR_BODY.md
+
+            gh pr create \
+              --base main \
+              --head "$BRANCH_NAME" \
+              --title "feat: PR da branch ${{ github.ref_name }}" \
+              --body-file PR_BODY.md \
+              --label "automacao,para-revisao"
+          else
+            echo "Um PR (#$existing_pr) já existe para a branch $BRANCH_NAME. Nada a fazer."
+          fi
