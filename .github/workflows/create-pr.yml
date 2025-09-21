@@ -3,7 +3,8 @@ name: 'Create Pull Request'
 on:
   push:
     branches:
-      - 'feature/**' # Aciona o workflow em qualquer branch que comece com "feature/"
+      - 'hostfix/*'
+#      - 'feature/**' # Aciona o workflow em qualquer branch que comece com "feature/"
 
 permissions:
   pull-requests: write # Permite criar e gerenciar PRs  
@@ -24,7 +25,7 @@ jobs:
         run: git fetch --all
       - name: Ensure labels exist in repository
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
           gh label create "automacao" --description "Pull Request criado por automação" --color "c5def5" || echo "Label 'automacao' já existe."
           gh label create "para-revisao" --description "PR pronto para revisão" --color "fbca04" || echo "Label 'para-revisao' já existe."

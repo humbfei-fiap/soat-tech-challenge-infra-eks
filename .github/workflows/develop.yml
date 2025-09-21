@@ -63,6 +63,11 @@ jobs:
           # Passa o token para a action poder comentar no Pull Request
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
+      - name: Terraform Plan for Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        id: plan
+        run: terraform plan -out=tfplan
+
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false tfplan
