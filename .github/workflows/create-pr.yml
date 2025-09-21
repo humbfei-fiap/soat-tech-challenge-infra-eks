@@ -24,7 +24,7 @@ jobs:
         run: git fetch --all
       - name: Ensure labels exist in repository
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
           gh label create "automacao" --description "Pull Request criado por automação" --color "c5def5" || echo "Label 'automacao' já existe."
           gh label create "para-revisao" --description "PR pronto para revisão" --color "fbca04" || echo "Label 'para-revisao' já existe."
@@ -36,7 +36,7 @@ jobs:
       
         env:
           # O GITHUB_TOKEN com as permissões definidas acima é passado para a CLI.
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           BRANCH_NAME: ${{ github.ref_name }}
   
         run: |
