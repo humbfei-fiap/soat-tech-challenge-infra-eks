@@ -17,10 +17,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "meu-eks-terraform-state" # 
+    bucket         = "meu-eks-terraform-state"
     key            = "global/eks/terraform.tfstate"
-    region         = "us-east-1" # SUBSTITUA
-    dynamodb_table = "meu-eks-terraform-lock-001" # 
+    region         = "us-east-1"
+    dynamodb_table = "meu-eks-terraform-lock-001"
     encrypt        = true
   }
 }
@@ -29,24 +29,27 @@ provider "aws" {
   region = var.aws_region
 }
 
-data "aws_eks_cluster" "cluster" {
-  name = local.cluster_name
-}
-
-data "aws_eks_cluster_auth" "cluster" {
-  name = local.cluster_name
-}
+# Configuração moderna e correta para os providers se autenticarem no EKS.
+# Eles usarão o endpoint público e um token de curta duração gerado pelo AWS CLI.
 
 provider "kubernetes" {
-  host                   = data.aws_eks_cluster.cluster.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
-  token                  = data.aws_eks_cluster_auth.cluster.token
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = module.eks.cluster_certificate_authority_data
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_id]
+  }
 }
 
 provider "helm" {
-  kubernetes = {
-    host                   = data.aws_eks_cluster.cluster.endpoint
-    cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
-    token                  = data.aws_eks_cluster_auth.cluster.token
+  kubernetes {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = module.eks.cluster_certificate_authority_data
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_id]
+    }
   }
 }
