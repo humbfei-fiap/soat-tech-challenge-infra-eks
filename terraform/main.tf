@@ -135,7 +135,7 @@ resource "kubernetes_config_map_v1_data" "aws_auth" {
     # Mapeia o role dos nós para que eles possam se juntar ao cluster
     mapRoles = yamlencode(concat(
       [
-        for role_arn in module.eks.eks_managed_node_group_roles : {
+        for role_arn in values(module.eks.eks_managed_node_groups_iam_role_arns) : {
           rolearn  = role_arn
           username = "system:node:{{EC2PrivateDNSName}}"
           groups   = ["system:bootstrappers", "system:nodes"]
