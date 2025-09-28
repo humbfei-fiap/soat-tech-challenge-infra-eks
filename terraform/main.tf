@@ -80,7 +80,7 @@ module "eks" {
   # ATENÇÃO: Isso expõe a API para a internet. A segurança depende da autenticação IAM/RBAC.
   cluster_endpoint_private_access = true
   cluster_endpoint_public_access  = true
-  public_access_cidrs             = ["0.0.0.0/0"]
+  cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
 
   # Habilita logs essenciais para auditoria, debug e análise de segurança
   cluster_enabled_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
