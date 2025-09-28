@@ -3,7 +3,7 @@ name: 'Create Pull Request'
 on:
   push:
     branches:
-      - 'hostfix/*'
+      - 'feature/*'
 #      - 'feature/**' # Aciona o workflow em qualquer branch que comece com "feature/"
 
 permissions:
