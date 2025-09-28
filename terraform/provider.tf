@@ -29,23 +29,23 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Configuração moderna e correta para os providers se autenticarem no EKS.
-# Eles usarão o endpoint público e um token de curta duração gerado pelo AWS CLI.
-
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = module.eks.cluster_certificate_authority_data
-exec {
-      api_version = "client.authentication.k8s.io/v1beta1"
-      command     = "aws"
-      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_id]
-    }
+
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_id]
   }
+}
+
 provider "helm" {
-  kubernetes = {
+  kubernetes {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = module.eks.cluster_certificate_authority_data
-exec {
+
+    exec {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
       args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_id]
