@@ -63,47 +63,33 @@ resource "aws_kms_key" "eks_secrets" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "19.16.0" # Use uma versão específica
+  version = "~> 20.0" # ATUALIZADO
 
   cluster_name    = local.cluster_name
-  # A versão 1.32 ainda não está disponível no EKS.
-  # Usando a versão estável mais recente (1.30).
   cluster_version = "1.30"
 
-  # Associa o cluster com a VPC criada pelo módulo "vpc"
   vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.private_subnets # Coloca os nodes nas subnets privadas
+  subnet_ids = module.vpc.private_subnets
 
-  # --- Configurações Críticas de Segurança ---
+  # O modo de autenticação é novo na v20
+  authentication_mode = "API_AND_CONFIG_MAP"
 
-  # Torna o endpoint da API do Kubernetes acessível publicamente para o GitHub Actions.
-  # ATENÇÃO: Isso expõe a API para a internet. A segurança depende da autenticação IAM/RBAC.
   cluster_endpoint_private_access = true
   cluster_endpoint_public_access  = true
   cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
 
-  # Habilita logs essenciais para auditoria, debug e análise de segurança
   cluster_enabled_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 
-  # Configura a criptografia de envelope para os secrets do Kubernetes usando nossa chave KMS
   cluster_encryption_config = {
     provider_key_arn = aws_kms_key.eks_secrets.arn
     resources        = ["secrets"]
   }
 
-  manage_aws_auth_configmap = false
-
-  # Habilita o provedor OIDC do cluster, que é o pré-requisito para
-  # usar o IAM Roles for Service Accounts (IRSA).
   enable_irsa = true
 
-  # --- Configuração dos Worker Nodes ---
-  
   eks_managed_node_group_defaults = {
-    # Imagem otimizada para EKS com hardening de segurança da AWS
-    ami_type                    = "AL2_x86_64"
-    # Garante que os nós sejam criados apenas nas subnets privadas
-    subnet_ids                  = module.vpc.private_subnets
+    ami_type   = "AL2_x86_64"
+    subnet_ids = module.vpc.private_subnets
   }
 
   eks_managed_node_groups = {
@@ -114,44 +100,24 @@ module "eks" {
       desired_size   = var.desired_size
     }
   }
-
-  manage_aws_auth_configmap = false
 }
 
 ################################################################################
-# GERENCIAMENTO DO CONFIGMAP AWS-AUTH
-# Assumimos o controle do aws-auth para contornar a limitação do módulo EKS
-# em ambientes que rodam Terraform de fora da VPC (ex: GitHub Actions).
+# GERENCIAMENTO DO CONFIGMAP AWS-AUTH (MÉTODO DA V20)
 ################################################################################
 
-resource "kubernetes_config_map_v1_data" "aws_auth" {
-  # Garante que o cluster esteja pronto antes de tentar modificar o configmap
-  depends_on = [module.eks.cluster_id]
+module "eks_aws_auth" {
+  source  = "terraform-aws-modules/eks/aws//modules/aws-auth"
+  version = "~> 20.0"
 
-  metadata {
-    name      = "aws-auth"
-    namespace = "kube-system"
-  }
+  manage_aws_auth_configmap = true
 
-  data = {
-    # Mapeia o role dos nós para que eles possam se juntar ao cluster
-    mapRoles = yamlencode(concat(
-      [
-        for role in values(module.eks.eks_managed_node_groups) : {
-          rolearn  = role.iam_role_arn
-          username = "system:node:{{EC2PrivateDNSName}}"
-          groups   = ["system:bootstrappers", "system:nodes"]
-        }
-      ],
-    ))
-
-    # Mapeia seu usuário IAM para o grupo de administradores do cluster
-    mapUsers = yamlencode([
-      {
-        userarn  = "arn:aws:iam::239409137076:user/user_aws"
-        username = "admin"
-        groups   = ["system:masters"]
-      }
-    ])
-  }
+  # Mapeia seu usuário IAM para o grupo de administradores do cluster
+  aws_auth_users = [
+    {
+      userarn  = "arn:aws:iam::239409137076:user/user_aws"
+      username = "admin"
+      groups   = ["system:masters"]
+    }
+  ]
 }
