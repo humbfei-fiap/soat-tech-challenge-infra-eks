@@ -113,18 +113,43 @@ module "eks" {
     }
   }
 
-  manage_aws_auth_configmap = true
-  aws_auth_users = [
-    {
-      userarn  = "arn:aws:iam::239409137076:user/user_aws"
-      username = "admin"
-      groups   = ["system:masters"]
-    }
-  ]
+  manage_aws_auth_configmap = false
+}
 
-  tags = {
-    Environment = "production"
-    ManagedBy   = "Terraform"
-    Project     = "MeuProjeto"
+################################################################################
+# GERENCIAMENTO DO CONFIGMAP AWS-AUTH
+# Assumimos o controle do aws-auth para contornar a limitação do módulo EKS
+# em ambientes que rodam Terraform de fora da VPC (ex: GitHub Actions).
+################################################################################
+
+resource "kubernetes_config_map_v1_data" "aws_auth" {
+  # Garante que o cluster esteja pronto antes de tentar modificar o configmap
+  depends_on = [module.eks.cluster_id]
+
+  metadata {
+    name      = "aws-auth"
+    namespace = "kube-system"
+  }
+
+  data = {
+    # Mapeia o role dos nós para que eles possam se juntar ao cluster
+    mapRoles = yamlencode(concat(
+      [
+        for role_arn in module.eks.eks_managed_node_group_roles : {
+          rolearn  = role_arn
+          username = "system:node:{{EC2PrivateDNSName}}"
+          groups   = ["system:bootstrappers", "system:nodes"]
+        }
+      ],
+    ))
+
+    # Mapeia seu usuário IAM para o grupo de administradores do cluster
+    mapUsers = yamlencode([
+      {
+        userarn  = "arn:aws:iam::239409137076:user/user_aws"
+        username = "admin"
+        groups   = ["system:masters"]
+      }
+    ])
   }
 }
