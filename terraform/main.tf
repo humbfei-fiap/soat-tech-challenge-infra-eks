@@ -112,6 +112,14 @@ module "eks" {
     }
   }
 
+  map_users = [
+    {
+      userarn  = "arn:aws:iam::239409137076:user/user_aws"
+      username = "admin"
+      groups   = ["system:masters"]
+    }
+  ]
+
   tags = {
     Environment = "production"
     ManagedBy   = "Terraform"
