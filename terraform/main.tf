@@ -91,6 +91,8 @@ module "eks" {
     resources        = ["secrets"]
   }
 
+  manage_aws_auth_configmap = false
+
   # Habilita o provedor OIDC do cluster, que é o pré-requisito para
   # usar o IAM Roles for Service Accounts (IRSA).
   enable_irsa = true
