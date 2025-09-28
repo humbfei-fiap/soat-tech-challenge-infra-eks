@@ -103,21 +103,31 @@ module "eks" {
 }
 
 ################################################################################
-# GERENCIAMENTO DO CONFIGMAP AWS-AUTH (MÉTODO DA V20)
+# GERENCIAMENTO DO CONFIGMAP AWS-AUTH (MANUAL)
 ################################################################################
 
-module "eks_aws_auth" {
-  source  = "terraform-aws-modules/eks/aws//modules/aws-auth"
-  version = "~> 20.0"
+resource "kubernetes_config_map_v1_data" "aws_auth" {
+  depends_on = [module.eks.cluster_id]
 
-  manage_aws_auth_configmap = true
+  metadata {
+    name      = "aws-auth"
+    namespace = "kube-system"
+  }
 
-  # Mapeia seu usuário IAM para o grupo de administradores do cluster
-  aws_auth_users = [
-    {
-      userarn  = "arn:aws:iam::239409137076:user/user_aws"
-      username = "admin"
-      groups   = ["system:masters"]
-    }
-  ]
+  data = {
+    mapRoles = yamlencode([
+      for role in values(module.eks.eks_managed_node_groups) : {
+        rolearn  = role.iam_role_arn
+        username = "system:node:{{EC2PrivateDNSName}}"
+        groups   = ["system:bootstrappers", "system:nodes"]
+      }
+    ])
+    mapUsers = yamlencode([
+      {
+        userarn  = "arn:aws:iam::239409137076:user/user_aws"
+        username = "admin"
+        groups   = ["system:masters"]
+      }
+    ])
+  }
 }
