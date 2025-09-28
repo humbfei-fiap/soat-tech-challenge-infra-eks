@@ -112,7 +112,8 @@ module "eks" {
     }
   }
 
-  map_users = [
+  manage_aws_auth_configmap = true
+  aws_auth_users = [
     {
       userarn  = "arn:aws:iam::239409137076:user/user_aws"
       username = "admin"
