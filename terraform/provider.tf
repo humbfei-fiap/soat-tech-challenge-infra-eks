@@ -14,6 +14,10 @@ terraform {
       source  = "hashicorp/helm"
       version = ">= 2.9"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.4"
+    }
   }
 
   backend "s3" {
