@@ -1,5 +1,6 @@
-
 provider "kubernetes" {
+  alias = "eks_cluster"
+
   host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
 
@@ -11,6 +12,8 @@ provider "kubernetes" {
 }
 
 provider "helm" {
+  alias = "eks_cluster"
+
   kubernetes = {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
@@ -24,6 +27,8 @@ provider "helm" {
 }
 
 resource "helm_release" "ingress_nginx" {
+  provider = helm.eks_cluster
+
   # Garante que o EKS e o IRSA estejam prontos antes de instalar o Helm chart
   depends_on = [module.eks.cluster_id]
 
