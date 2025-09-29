@@ -1,61 +1,48 @@
-# Obtém um token de autenticação para o cluster.
-data "aws_eks_cluster_auth" "cluster" {
-  name = module.eks.cluster_id
-}
-
-# Cria um arquivo kubeconfig local temporário com as credenciais do cluster.
-resource "local_file" "kubeconfig" {
-  content = yamlencode({
-    apiVersion      = "v1"
-    kind            = "Config"
-    current-context = "eks"
-    clusters = [{
-      name = module.eks.cluster_id
-      cluster = {
-        server                   = module.eks.cluster_endpoint
-        certificate-authority-data = module.eks.cluster_certificate_authority_data
-      }
-    }]
-    contexts = [{
-      name = "eks"
-      context = {
-        cluster = module.eks.cluster_id
-        user    = "eks"
-      }
-    }]
-    users = [{
-      name = "eks"
-      user = {
-        token = data.aws_eks_cluster_auth.cluster.token
-      }
-    }]
-  })
-  filename = "${path.cwd}/kubeconfig.yaml"
-}
-
-# Configura o provedor Kubernetes para usar o arquivo kubeconfig gerado.
 provider "kubernetes" {
-  alias      = "eks_cluster"
-  kubeconfig = local_file.kubeconfig.filename
-}
-
-# Configura o provedor Helm para usar o arquivo kubeconfig gerado.
-provider "helm" {
   alias = "eks_cluster"
-  kubernetes = {
-    kubeconfig = local_file.kubeconfig.filename
+
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "aws"
+    args        = ["eks", "get-token", "--cluster-name", local.cluster_name]
   }
 }
 
-# Instala o ingress-nginx usando a configuração de provedor com alias.
+provider "helm" {
+  alias = "eks_cluster"
+
+  kubernetes = {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+
+    exec = {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      args        = ["eks", "get-token", "--cluster-name", local.cluster_name]
+    }
+  }
+}
+
+# Recurso para esperar 60 segundos após a criação das políticas de acesso do EKS.
+# Isso serve como um workaround para a latência de propagação das permissões no control plane.
+resource "time_sleep" "wait_for_eks_auth_propagation" {
+  depends_on = [
+    aws_eks_access_policy_association.admin_user_policy,
+    aws_eks_access_policy_association.apply_role_policy
+  ]
+
+  create_duration = "60s"
+}
+
 resource "helm_release" "ingress_nginx" {
   provider = helm.eks_cluster
 
-  # Garante que a instalação só ocorra após o kubeconfig e as políticas de acesso existirem.
+  # Depende do recurso de espera, que por sua vez depende das políticas de acesso.
   depends_on = [
-    local_file.kubeconfig,
-    aws_eks_access_policy_association.admin_user_policy,
-    aws_eks_access_policy_association.apply_role_policy
+    time_sleep.wait_for_eks_auth_propagation
   ]
 
   name       = "ingress-nginx"
