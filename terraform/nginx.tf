@@ -30,7 +30,7 @@ resource "helm_release" "ingress_nginx" {
   provider = helm.eks_cluster
 
   # Garante que o EKS e o IRSA estejam prontos antes de instalar o Helm chart
-  depends_on = [module.eks.cluster_id]
+  depends_on = [module.eks.cluster_id, aws_eks_access_policy_association.admin_user_policy, aws_eks_access_policy_association.apply_role_policy]
 
   name       = "ingress-nginx"
   repository = "https://kubernetes.github.io/ingress-nginx"
