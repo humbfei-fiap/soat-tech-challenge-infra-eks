@@ -66,13 +66,13 @@ module "eks" {
   version = "~> 20.0" # ATUALIZADO
 
   cluster_name    = local.cluster_name
-  cluster_version = "1.30"
+  cluster_version = "1.32"
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
   # O modo de autenticação é novo na v20
-  authentication_mode = "API_AND_CONFIG_MAP"
+  authentication_mode = "API"
 
   cluster_endpoint_private_access = true
   cluster_endpoint_public_access  = true
@@ -103,31 +103,40 @@ module "eks" {
 }
 
 ################################################################################
-# GERENCIAMENTO DO CONFIGMAP AWS-AUTH (MANUAL)
+# GERENCIAMENTO DE ACESSO VIA EKS ACCESS ENTRY
 ################################################################################
 
-resource "kubernetes_config_map_v1_data" "aws_auth" {
-  depends_on = [module.eks.cluster_id]
 
-  metadata {
-    name      = "aws-auth"
-    namespace = "kube-system"
-  }
 
-  data = {
-    mapRoles = yamlencode([
-      for role in values(module.eks.eks_managed_node_groups) : {
-        rolearn  = role.iam_role_arn
-        username = "system:node:{{EC2PrivateDNSName}}"
-        groups   = ["system:bootstrappers", "system:nodes"]
-      }
-    ])
-    mapUsers = yamlencode([
-      {
-        userarn  = "arn:aws:iam::239409137076:user/user_aws"
-        username = "admin"
-        groups   = ["system:masters"]
-      }
-    ])
+resource "aws_eks_access_entry" "admin_user" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = "arn:aws:iam::239409137076:user/user_aws"
+  type          = "STANDARD"
+}
+
+resource "aws_eks_access_policy_association" "admin_user_policy" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = aws_eks_access_entry.admin_user.principal_arn
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+  access_scope {
+    type = "cluster"
   }
 }
+
+resource "aws_eks_access_entry" "apply_role" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = "arn:aws:iam::239409137076:role/role-eks-apply"
+  type          = "STANDARD"
+}
+
+resource "aws_eks_access_policy_association" "apply_role_policy" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = aws_eks_access_entry.apply_role.principal_arn
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+  access_scope {
+    type = "cluster"
+  }
+}
+
