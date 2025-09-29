@@ -42,7 +42,7 @@ provider "kubernetes" {
 # Configura o provedor Helm para usar o arquivo kubeconfig gerado.
 provider "helm" {
   alias = "eks_cluster"
-  kubernetes {
+  kubernetes = {
     kubeconfig = local_file.kubeconfig.filename
   }
 }
