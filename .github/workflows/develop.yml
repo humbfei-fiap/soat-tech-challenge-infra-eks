@@ -5,21 +5,16 @@ on:
     branches:
       - main # Roda o apply quando houver push na main
   pull_request: # Roda apenas o plan para pull requests
-  workflow_dispatch: # Permite acionamento manual
-    inputs:
-      enable_destroy:
-        description: 'Marque para habilitar o job de destruição. CUIDADO: Isso deletará todos os recursos.'
-        required: true
-        type: boolean
-        default: false
+  workflow_dispatch: # Permite acionamento manual do deploy
+
 permissions:
   id-token: write # Permissão para o workflow obter um OIDC token
   pull-requests: write # Permissão para comentar nos Pull Requests
   contents: read  # Permissão para o workflow ler o repositório
 
-# Garante que apenas uma instância deste workflow seja executada por vez para a mesma branch.
-# A alteração para um grupo estático garante que NENHUMA operação de terraform (plan, apply, destroy)
-# deste workflow rode em paralelo, independentemente da branch. Isso resolve o erro de 'state lock'.
+# Garante que apenas uma instância deste workflow seja executada por vez.
+# O grupo estático garante que NENHUMA operação de terraform (plan, apply, destroy)
+# rode em paralelo, independentemente da branch ou do workflow.
 concurrency:
   group: terraform-state-lock
   cancel-in-progress: true
@@ -27,8 +22,6 @@ concurrency:
 jobs:
   terraform:
     name: 'Terraform Plan/Apply'
-    # Garante que este job não rode se for um acionamento manual para destruir.
-    if: github.event.inputs.enable_destroy != 'true'
     runs-on: ubuntu-latest
     
     defaults:
@@ -54,7 +47,7 @@ jobs:
         id: init
         run: terraform init
 
-      - name: Terraform Plan
+      - name: Terraform Plan on PR
         if: github.event_name == 'pull_request'
         uses: dflook/terraform-plan@v1
         with:
@@ -64,48 +57,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
       - name: Terraform Plan for Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        # Roda o plan para push na main ou para acionamento manual
+        if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
         id: plan
         run: terraform plan -out=tfplan
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        # Roda o apply para push na main ou para acionamento manual
+        if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
         run: terraform apply -auto-approve -input=false tfplan
-
-  destroy:
-    name: 'Terraform Destroy'
-    # Adiciona uma camada de proteção com aprovação manual obrigatória.
-    environment:
-      name: 'production'
-      # O URL aponta para a execução do workflow para fácil acesso
-      url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.enable_destroy == 'true'
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        shell: bash
-        working-directory: ./terraform # Indica que os comandos devem rodar na pasta terraform
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::239409137076:role/role-eks-fiap
-          aws-region: us-east-1
-          audience: sts.amazonaws.com
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.5.7
-      - name: Terraform Init
-        id: init
-        run: terraform init
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-      - name: Terraform Destroy
-        run: terraform destroy -auto-approve -input=false
-        

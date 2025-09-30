@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0 # Busca todo o histórico para gerar a lista de commits
       - name: Fetch all branches
         run: git fetch --all
-      - name: Ensure labels exist in repository
+      - name: Checando as credenciais. 
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -33,7 +33,7 @@ jobs:
 
       # Este passo usa a CLI oficial do GitHub para criar o PR.
       # É a forma mais robusta e correta de realizar esta automação.
-      - name: Create Pull Request if it does not exist
+      - name: Criando PR 
       
         env:
           # O GITHUB_TOKEN com as permissões definidas acima é passado para a CLI.
