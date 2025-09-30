@@ -1,9 +1,23 @@
-aws_region = "us-east-1"
-cluster_name = "eks-fiap-dev"
-vpc_cidr = "10.0.0.0/16"
-public_subnet_cidrs = ["10.0.101.0/24", "10.0.102.0/24"]
-private_subnet_cidrs = ["10.0.1.0/24", "10.0.2.0/24"]
-instance_types = ["t3.medium"]
-desired_size = 2
-max_size = 3
-min_size = 1
+# ===============================================================
+# Configurações Gerais
+# ===============================================================
+aws_region   = "us-east-1"
+cluster_name = "soat-eks-cluster"
+cluster_version = "1.33"
+
+# ===============================================================
+# Configurações de Rede (Valores que você já forneceu)
+# ===============================================================
+vpc_id     = "vpc-8ce247f1"
+subnet_ids = ["subnet-8a652684", "subnet-c3f47da5"]
+
+# ===============================================================
+# Configurações do Grupo de Nós (Worker Nodes)
+# ===============================================================
+node_group_name       = "ng-primario"
+node_instance_type    = "t3.medium"
+node_desired_capacity = 2
+node_min_capacity     = 1
+node_max_capacity     = 3
+
+

@@ -1,48 +1,49 @@
 variable "aws_region" {
-  description = "Região da AWS para criar os recursos"
+  description = "A região da AWS onde os recursos serão criados."
   type        = string
-  default     = "us-east-1"
 }
 
 variable "cluster_name" {
-  description = "Nome do cluster EKS"
+  description = "O nome do cluster EKS."
   type        = string
-  default     = "eks-techchallenger"
 }
 
-variable "vpc_cidr" {
-  description = "Bloco CIDR para a VPC"
+variable "vpc_id" {
+  description = "O ID da VPC existente onde o cluster será implantado."
   type        = string
-  default     = "10.0.0.0/16"
 }
 
-variable "public_subnet_cidrs" {
-  description = "Lista de blocos CIDR para as sub-redes públicas."
+variable "subnet_ids" {
+  description = "Uma lista de IDs de sub-redes existentes para os nós do EKS."
   type        = list(string)
 }
 
-variable "private_subnet_cidrs" {
-  description = "Lista de blocos CIDR para as sub-redes privadas."
-  type        = list(string)
+variable "node_instance_type" {
+  description = "O tipo de instância EC2 para os nós de trabalho."
+  type        = string
 }
 
-variable "instance_types" {
-  description = "Lista de tipos de instância para o grupo de nós gerenciado do EKS."
-  type        = list(string)
-  default     = ["t3.medium"]
+variable "node_group_name" {
+  description = "O nome do grupo de nós gerenciados do EKS."
+  type        = string
 }
 
-variable "desired_size" {
-  description = "Número desejado de nós no grupo de nós gerenciado do EKS."
+variable "node_desired_capacity" {
+  description = "O número desejado de nós no grupo."
   type        = number
 }
 
-variable "max_size" {
-  description = "Número máximo de nós no grupo de nós gerenciado do EKS."
+variable "node_min_capacity" {
+  description = "O número mínimo de nós no grupo."
   type        = number
 }
 
-variable "min_size" {
-  description = "Número mínimo de nós no grupo de nós gerenciado do EKS."
+variable "node_max_capacity" {
+  description = "O número máximo de nós no grupo."
   type        = number
+}
+
+variable "cluster_version" {
+  description = "A versão do Kubernetes para o cluster EKS."
+  type        = string
 }
