@@ -64,7 +64,7 @@ jobs:
             gh pr create \
               --base main \
               --head "$BRANCH_NAME" \
-              --title "feat: PR da branch ${{ github.ref_name }}" \
+              --title "PR aberto automaticamente da branch ${{ github.ref_name }}" \
               --body-file PR_BODY.md \
               --label "automacao,para-revisao"
           else

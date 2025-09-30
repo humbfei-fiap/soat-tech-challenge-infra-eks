@@ -25,6 +25,16 @@ module "eks" {
       desired_size = var.node_desired_capacity
     }
   }
+
+  aws_auth_roles = [
+    {
+      rolearn  = "arn:aws:iam::239409137076:role/role-eks-fiap"
+      username = "role-eks-fiap"
+      groups = [
+        "system:masters"
+      ]
+    }
+  ]
 }
 
 # Instala o AWS Load Balancer Controller usando Helm
