@@ -13,6 +13,7 @@ module "eks" {
   subnet_ids = data.aws_subnets.existing.ids
 
   cluster_endpoint_public_access = true
+  bootstrap_cluster_creator_admin_permissions = true
 
   # Configuração do grupo de nós gerenciados
   eks_managed_node_groups = {
