@@ -12,6 +12,8 @@ module "eks" {
   vpc_id     = data.aws_vpc.existing.id
   subnet_ids = data.aws_subnets.existing.ids
 
+  cluster_endpoint_public_access = true
+
   # Configuração do grupo de nós gerenciados
   eks_managed_node_groups = {
     (var.node_group_name) = {
