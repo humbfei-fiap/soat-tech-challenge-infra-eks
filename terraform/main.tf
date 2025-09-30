@@ -25,14 +25,25 @@ module "eks" {
       desired_size = var.node_desired_capacity
     }
   }
+}
+
+module "eks_aws_auth" {
+  source  = "terraform-aws-modules/eks/aws//modules/aws-auth"
+  version = "20.4.0"
 
   aws_auth_roles = [
     {
       rolearn  = "arn:aws:iam::239409137076:role/role-eks-fiap"
       username = "role-eks-fiap"
-      groups = [
-        "system:masters"
-      ]
+      groups   = ["system:masters"]
+    }
+  ]
+
+  aws_auth_users = [
+    {
+      userarn  = "arn:aws:iam::239409137076:user/user_aws"
+      username = "user_aws"
+      groups   = ["system:masters"]
     }
   ]
 }
