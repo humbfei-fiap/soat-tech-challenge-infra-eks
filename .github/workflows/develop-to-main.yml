@@ -52,6 +52,10 @@ jobs:
         id: plan_to_markdown
         run: |
           # Gera um sumário em markdown a partir do plano JSON para ser usado no corpo do PR
+          echo "--- Output of terraform show -json tfplan ---"
+          terraform show -json tfplan
+          echo "--- End of output ---"
+
           PLAN_SUMMARY=$(terraform show -json tfplan | jq -r '
           (
             "### Terraform Plan Summary",
