@@ -18,6 +18,18 @@ locals {
         }
       }
     }
+    # Permissão para a role do GitHub Actions
+    github_actions_role = {
+      principal_arn = "arn:aws:iam::239409137076:role/role-eks-fiap"
+      policy_associations = {
+        cluster-admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
     # Adicione outras entradas de acesso aqui, se necessário.
     # Exemplo para uma role:
     # another-role = {
