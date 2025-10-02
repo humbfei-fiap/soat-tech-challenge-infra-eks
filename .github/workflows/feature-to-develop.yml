@@ -48,7 +48,7 @@ jobs:
             gh pr create \
               --base develop \
               --head "$BRANCH_NAME" \
-              --title "Feature: ${{ github.ref_name }} -> develop" \
+              --title "PR aberto automaticamente: ${{ github.ref_name }} -> develop" \
               --body-file PR_BODY.md \
               --label "automacao,para-revisao"
           else
