@@ -19,22 +19,14 @@ concurrency:
   cancel-in-progress: false # Não cancelar a destruição se outro workflow for iniciado
 
 jobs:
-  debug:
-    name: 'Debug Inputs'
-    runs-on: ubuntu-latest
-    steps:
-      - name: 'Print inputs'
-        run: echo "Confirm destroy value is ${{ github.event.inputs.confirm_destroy }}"
-
   destroy:
     name: 'Terraform Destroy'
-    needs: debug # Garante que o debug rode primeiro
     # Adiciona uma camada de proteção com aprovação manual obrigatória.
     environment:
       name: 'production'
       # O URL aponta para a execução do workflow para fácil acesso
       url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-    if: github.event.inputs.confirm_destroy == true
+    if: ${{ github.event.inputs.confirm_destroy }}
     runs-on: ubuntu-latest
 
     defaults:
