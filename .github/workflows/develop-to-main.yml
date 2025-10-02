@@ -51,6 +51,7 @@ jobs:
       - name: Create Plan Summary
         id: plan_to_markdown
         run: |
+          unset PLAN_SUMMARY
           # Gera um sumário em markdown a partir do plano JSON para ser usado no corpo do PR
 
           # Debugging step 1: Show the plain text plan
