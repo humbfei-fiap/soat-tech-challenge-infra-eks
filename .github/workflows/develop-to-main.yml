@@ -52,11 +52,13 @@ jobs:
         id: plan_to_markdown
         run: |
           # Gera um sumário em markdown a partir do plano JSON para ser usado no corpo do PR
-          echo "--- Output of terraform show -json tfplan ---"
-          terraform show -json tfplan
-          echo "--- End of output ---"
+          JSON_PLAN=$(terraform show -json tfplan)
+          if [ $? -ne 0 ]; then
+            echo "::error::terraform show -json tfplan failed"
+            exit 1
+          fi
 
-          PLAN_SUMMARY=$(terraform show -json tfplan | jq -r '
+          PLAN_SUMMARY=$(echo "$JSON_PLAN" | jq -r '
           (
             "### Terraform Plan Summary",
             "",
