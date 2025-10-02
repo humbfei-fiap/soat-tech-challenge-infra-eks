@@ -11,7 +11,7 @@ on:
 
 permissions:
   id-token: write # Permissão para o workflow obter um OIDC token
-  contents: write  # Permissão para o workflow ler o repositório
+  contents: read  # Permissão para o workflow ler o repositório
 
 # Garante que nenhuma outra operação de terraform (plan, apply) rode em paralelo.
 concurrency:
@@ -19,8 +19,16 @@ concurrency:
   cancel-in-progress: false # Não cancelar a destruição se outro workflow for iniciado
 
 jobs:
+  debug:
+    name: 'Debug Inputs'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Print inputs'
+        run: echo "Confirm destroy value is ${{ github.event.inputs.confirm_destroy }}"
+
   destroy:
     name: 'Terraform Destroy'
+    needs: debug # Garante que o debug rode primeiro
     # Adiciona uma camada de proteção com aprovação manual obrigatória.
     environment:
       name: 'production'
