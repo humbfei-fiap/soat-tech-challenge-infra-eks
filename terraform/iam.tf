@@ -1,9 +1,39 @@
 #==============================================================================
-# Papéis para o Cluster e para os Nós (serão criados pelo módulo do EKS)
+# Controle de Acesso ao Cluster (Usuários e Roles)
 #==============================================================================
-# O módulo terraform-aws-eks que usaremos no main.tf irá criar e anexar
-# automaticamente os papéis e políticas corretas para o cluster e para os nós.
-# Isso simplifica o código e garante que as permissões padrão sejam usadas.
+
+locals {
+  # Define aqui as permissões de acesso ao cluster.
+  # Adicione usuários ou roles da AWS que precisarão de acesso.
+  access_entries = {
+    # Permissão para o usuário que está criando o cluster
+    cluster_creator = {
+      principal_arn = "arn:aws:iam::239409137076:user/user_aws"
+      policy_associations = {
+        cluster-admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+    # Adicione outras entradas de acesso aqui, se necessário.
+    # Exemplo para uma role:
+    # another-role = {
+    #   principal_arn = "arn:aws:iam::239409137076:role/another-role"
+    #   policy_associations = {
+    #     developer = {
+    #       policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSDeveloperPolicy"
+    #       access_scope = {
+    #         type = "namespace"
+    #         namespaces = ["default"]
+    #       }
+    #     }
+    #   }
+    # }
+  }
+}
 
 #==============================================================================
 # Papel do IAM para o AWS Load Balancer Controller (IRSA)
@@ -11,7 +41,7 @@
 
 # Baixa a política de permissão recomendada pela AWS para o controller.
 data "http" "aws_load_balancer_controller_iam_policy" {
-  url = "https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.7.2/docs/install/iam_policy.json"
+  url = "https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json"
 }
 
 # Cria a política do IAM com o conteúdo baixado.

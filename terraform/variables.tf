@@ -47,3 +47,15 @@ variable "cluster_version" {
   description = "A versão do Kubernetes para o cluster EKS."
   type        = string
 }
+
+variable "create_vpc_link" {
+  description = "Se true, cria o VPC Link para ser usado pelo API Gateway."
+  type        = bool
+  default     = false
+}
+
+variable "nlb_hostname" {
+  description = "O hostname DNS do Network Load Balancer criado pelo Kubernetes. Necessário apenas se create_vpc_link for true."
+  type        = string
+  default     = ""
+}

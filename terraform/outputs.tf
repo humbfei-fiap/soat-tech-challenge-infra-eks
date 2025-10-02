@@ -17,3 +17,8 @@ output "configure_kubectl" {
   description = "Comando para configurar o kubectl para se conectar ao cluster."
   value = "aws eks --region ${var.aws_region} update-kubeconfig --name ${var.cluster_name}"
 }
+
+output "vpc_link_id" {
+  description = "O ID do VPC Link criado."
+  value       = aws_apigatewayv2_vpc_link.eks_vpc_link.id
+}

@@ -13,9 +13,8 @@ module "eks" {
   subnet_ids = data.aws_subnets.existing.ids
 
   cluster_endpoint_public_access = true
-  bootstrap_cluster_creator_admin_permissions = true
 
-  # Configuração do grupo de nós gerenciados
+  access_entries = local.access_entries
   eks_managed_node_groups = {
     (var.node_group_name) = {
       name           = var.node_group_name
@@ -28,27 +27,6 @@ module "eks" {
   }
 }
 
-module "eks_aws_auth" {
-  source  = "terraform-aws-modules/eks/aws//modules/aws-auth"
-  version = "20.4.0"
-
-  aws_auth_roles = [
-    {
-      rolearn  = "arn:aws:iam::239409137076:role/role-eks-fiap"
-      username = "role-eks-fiap"
-      groups   = ["system:masters"]
-    }
-  ]
-
-  aws_auth_users = [
-    {
-      userarn  = "arn:aws:iam::239409137076:user/user_aws"
-      username = "user_aws"
-      groups   = ["system:masters"]
-    }
-  ]
-}
-
 # Instala o AWS Load Balancer Controller usando Helm
 resource "helm_release" "aws_load_balancer_controller" {
   name       = "aws-load-balancer-controller"
@@ -57,24 +35,14 @@ resource "helm_release" "aws_load_balancer_controller" {
   namespace  = "kube-system"
   version    = "1.7.1" # Use uma versão compatível com seu cluster
 
-  set {
-    name  = "clusterName"
-    value = var.cluster_name
-  }
-
-  set {
-    name  = "serviceAccount.create"
-    value = "true"
-  }
-
-  set {
-    name  = "serviceAccount.name"
-    value = "aws-load-balancer-controller"
-  }
-
-  # Anota o Service Account com o ARN do papel do IAM que criamos
-  set {
-    name  = "serviceAccount.annotations.eks.amazonaws.com/role-arn"
-    value = aws_iam_role.aws_load_balancer_controller.arn
-  }
+  values = [
+    <<-EOT
+clusterName: ${var.cluster_name}
+serviceAccount:
+  create: true
+  name: aws-load-balancer-controller
+  annotations:
+    eks.amazonaws.com/role-arn: ${aws_iam_role.aws_load_balancer_controller.arn}
+EOT
+  ]
 }
