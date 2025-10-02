@@ -11,7 +11,7 @@ on:
 
 permissions:
   id-token: write # Permissão para o workflow obter um OIDC token
-  contents: read  # Permissão para o workflow ler o repositório
+  contents: write  # Permissão para o workflow ler o repositório
 
 # Garante que nenhuma outra operação de terraform (plan, apply) rode em paralelo.
 concurrency:
