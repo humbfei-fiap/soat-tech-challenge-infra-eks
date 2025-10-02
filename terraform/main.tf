@@ -1,49 +1,48 @@
-resource "aws_vpc" "soat_tech_challenge_vpc" {
-  cidr_block = "10.0.0.0/16" # This is the CIDR block for the VPC.
-  enable_dns_support = true
-  enable_dns_hostnames = true
+data "aws_eks_cluster_auth" "this" {
+  name = module.eks.cluster_name
+}
 
-  tags = {
-    Name = "soat-tech-challenge-vpc"
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 20.0"
+
+  cluster_name    = var.cluster_name
+  cluster_version = var.cluster_version
+
+  vpc_id     = data.aws_vpc.existing.id
+  subnet_ids = data.aws_subnets.existing.ids
+
+  cluster_endpoint_public_access = true
+
+  access_entries = local.access_entries
+  eks_managed_node_groups = {
+    (var.node_group_name) = {
+      name           = var.node_group_name
+      instance_types = [var.node_instance_type]
+
+      min_size     = var.node_min_capacity
+      max_size     = var.node_max_capacity
+      desired_size = var.node_desired_capacity
+    }
   }
 }
 
-resource "aws_subnet" "soat_tech_challenge_public_subnet_1" {
-  vpc_id = aws_vpc.soat_tech_challenge_vpc.id
-  cidr_block = "10.0.1.0/24"
-  availability_zone = "us-east-1a"
-  map_public_ip_on_launch = true
+# Instala o AWS Load Balancer Controller usando Helm
+resource "helm_release" "aws_load_balancer_controller" {
+  name       = "aws-load-balancer-controller"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  namespace  = "kube-system"
+  version    = "1.7.1" # Use uma versão compatível com seu cluster
 
-  tags = {
-    Name = "soat-tech-challenge-public-subnet-1"
-  }
+  values = [
+    <<-EOT
+clusterName: ${var.cluster_name}
+serviceAccount:
+  create: true
+  name: aws-load-balancer-controller
+  annotations:
+    eks.amazonaws.com/role-arn: ${aws_iam_role.aws_load_balancer_controller.arn}
+EOT
+  ]
 }
-
-resource "aws_subnet" "soat_tech_challenge_public_subnet_2" {
-  vpc_id = aws_vpc.soat_tech_challenge_vpc.id
-  cidr_block = "10.0.2.0/24"
-  availability_zone = "us-east-1b"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "soat-tech-challenge-public-subnet-2"
-  }
-}
-
-resource "aws_subnet" "soat_tech_challenge_private_subnet_1" {
-  vpc_id = aws_vpc.soat_tech_challenge_vpc.id
-  cidr_block = "10.0.3.0/24"
-  availability_zone = "us-east-1a"
-
-  tags = {
-    Name = "soat-tech-challenge-private-subnet-1"
-  }
-}
-
-resource "aws_subnet" "soat_tech_challenge_private_subnet_2" {
-  vpc_id = aws_vpc.soat_tech_challenge_vpc.id
-  cidr_block = "10.0.4.0/24"
-  availability_zone = "us-east-1b"
-
-  tags = {
-    Name = "soat-tech-challenge-private-subnet

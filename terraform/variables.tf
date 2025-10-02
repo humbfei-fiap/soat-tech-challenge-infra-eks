@@ -1,53 +1,61 @@
-variable "region" {
-  description = "AWS region"
+variable "aws_region" {
+  description = "A região da AWS onde os recursos serão criados."
   type        = string
-  default     = "us-east-1"
 }
 
 variable "cluster_name" {
-  description = "Name of the EKS cluster"
+  description = "O nome do cluster EKS."
   type        = string
-  default     = "soat-tech-challenge-eks-cluster"
 }
 
-variable "vpc_cidr_block" {
-  description = "CIDR block for the VPC"
+variable "vpc_id" {
+  description = "O ID da VPC existente onde o cluster será implantado."
   type        = string
-  default     = "10.0.0.0/16"
 }
 
-variable "public_subnet_cidrs" {
-  description = "List of CIDR blocks for public subnets"
+variable "subnet_ids" {
+  description = "Uma lista de IDs de sub-redes existentes para os nós do EKS."
   type        = list(string)
-  default     = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 
-variable "private_subnet_cidrs" {
-  description = "List of CIDR blocks for private subnets"
-  type        = list(string)
-  default     = ["10.0.10.0/24", "10.0.11.0/24"]
-}
-
-variable "instance_type" {
-  description = "EC2 instance type for worker nodes"
+variable "node_instance_type" {
+  description = "O tipo de instância EC2 para os nós de trabalho."
   type        = string
-  default     = "t2.medium"
 }
 
-variable "desired_size" {
-  description = "Desired number of worker nodes"
-  type        = number
-  default     = 1
+variable "node_group_name" {
+  description = "O nome do grupo de nós gerenciados do EKS."
+  type        = string
 }
 
-variable "max_size" {
-  description = "Maximum number of worker nodes"
+variable "node_desired_capacity" {
+  description = "O número desejado de nós no grupo."
   type        = number
-  default     = 2
 }
 
-variable "min_size" {
-  description = "Minimum number of worker nodes"
+variable "node_min_capacity" {
+  description = "O número mínimo de nós no grupo."
   type        = number
-  default     = 1
+}
+
+variable "node_max_capacity" {
+  description = "O número máximo de nós no grupo."
+  type        = number
+}
+
+variable "cluster_version" {
+  description = "A versão do Kubernetes para o cluster EKS."
+  type        = string
+}
+
+variable "create_vpc_link" {
+  description = "Se true, cria o VPC Link para ser usado pelo API Gateway."
+  type        = bool
+  default     = false
+}
+
+variable "nlb_hostname" {
+  description = "O hostname DNS do Network Load Balancer criado pelo Kubernetes. Necessário apenas se create_vpc_link for true."
+  type        = string
+  default     = ""
 }
