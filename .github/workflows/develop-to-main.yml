@@ -38,8 +38,7 @@ jobs:
               --head develop \
               --title "Infra: Deploy from Develop to Main" \
               --body "Este PR foi gerado automaticamente após um push na branch develop.
-
-As mudanças de infraestrutura serão aplicadas na 'main' após a aprovação e merge deste PR."
+              As mudanças de infraestrutura serão aplicadas na 'main' após a aprovação e merge deste PR."
           else
             echo "A PR (#$existing_pr) from develop to main already exists. Nothing to do."
           fi
