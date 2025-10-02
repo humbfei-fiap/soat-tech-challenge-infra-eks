@@ -5,8 +5,10 @@ on:
       - develop
 
 permissions:
-  pull-requests: write
-  contents: write # Necessário para fazer o checkout e criar o PR
+  id-token: write # Permissão para o workflow obter um OIDC token
+  pull-requests: write # Permissão para comentar nos Pull Requests
+  contents: read  # Permissão para o workflow ler o repositório
+  statuses: write # Permissão para criar status checks
 
 concurrency:
   group: terraform-state-lock
