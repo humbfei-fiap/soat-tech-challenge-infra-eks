@@ -52,11 +52,7 @@ jobs:
         id: plan_to_markdown
         run: |
           # Gera um sumário em markdown a partir do plano JSON para ser usado no corpo do PR
-          terraform show -json tfplan > tfplan.json
-          echo "--- Content of tfplan.json ---"
-          cat tfplan.json
-          echo "--- End of tfplan.json ---"
-          PLAN_SUMMARY=$(jq -r '
+          PLAN_SUMMARY=$(terraform show -json tfplan | jq -r '
           (
             "### Terraform Plan Summary",
             "",
@@ -65,7 +61,7 @@ jobs:
             (.resource_changes // []) | map(select(.change.actions[0] != "no-op")) | .[] | 
             "| `\(.change.actions[0])` | `\(.type)` | `\(.name)` |"
           )
-          ' tfplan.json)
+          ')
           echo "PLAN_SUMMARY<<EOF" >> $GITHUB_ENV
           echo "$PLAN_SUMMARY" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
