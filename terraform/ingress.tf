@@ -31,6 +31,7 @@ resource "kubernetes_deployment" "ingress_deployment" {
 
 # Define o Service do tipo LoadBalancer para expor o Ingress com um NLB
 resource "kubernetes_service" "ingress_service" {
+  depends_on = [helm_release.aws_load_balancer_controller]
   metadata {
     name = "ingress-service"
     annotations = {
