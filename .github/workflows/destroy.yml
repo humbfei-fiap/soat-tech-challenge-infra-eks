@@ -26,7 +26,7 @@ jobs:
       name: 'production'
       # O URL aponta para a execução do workflow para fácil acesso
       url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-    if: github.event.inputs.confirm_destroy == true
+    if: ${{ github.event.inputs.confirm_destroy }}
     runs-on: ubuntu-latest
 
     defaults:
