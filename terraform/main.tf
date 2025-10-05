@@ -26,23 +26,3 @@ module "eks" {
     }
   }
 }
-
-# Instala o AWS Load Balancer Controller usando Helm
-resource "helm_release" "aws_load_balancer_controller" {
-  name       = "aws-load-balancer-controller"
-  repository = "https://aws.github.io/eks-charts"
-  chart      = "aws-load-balancer-controller"
-  namespace  = "kube-system"
-  version    = "1.7.1" # Use uma versão compatível com seu cluster
-
-  values = [
-    <<-EOT
-clusterName: ${var.cluster_name}
-serviceAccount:
-  create: true
-  name: aws-load-balancer-controller
-  annotations:
-    eks.amazonaws.com/role-arn: ${aws_iam_role.aws_load_balancer_controller.arn}
-EOT
-  ]
-}
