@@ -20,5 +20,11 @@ output "configure_kubectl" {
 
 output "vpc_link_id" {
   description = "O ID do VPC Link criado."
-  value       = aws_apigatewayv2_vpc_link.eks_vpc_link.id
+  # Retorna o ID do VPC Link se ele for criado, ou uma string vazia caso contrário.
+  value       = join("", aws_apigatewayv2_vpc_link.this.*.id)
+}
+
+output "nginx_nlb_hostname" {
+  description = "O hostname do NLB compartilhado criado pelo NGINX Ingress Controller."
+  value       = data.kubernetes_service.nginx_ingress_service.status[0].load_balancer[0].ingress[0].hostname
 }

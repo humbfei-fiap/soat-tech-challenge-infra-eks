@@ -14,8 +14,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  terraform:
-    name: 'Terraform Apply'
+  terraform-eks:
+    name: 'Deploy EKS Cluster'
     runs-on: ubuntu-latest
     
     defaults:
@@ -47,6 +47,27 @@ jobs:
         id: plan
         run: terraform plan -out=tfplan
 
-      - name: Terraform Apply
+      - name: Terraform Init & Apply EKS
         id: apply
-        run: terraform apply -auto-approve -input=false tfplan
+        run:  terraform apply -target=module.eks -auto-approve
+
+        # --- JOB 2: Instala os addons ---
+  terraform-addons:
+    name: 'Deploy EKS Cluster'
+    needs: terraform-eks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-east-1
+          audience: sts.amazonaws.com
+
+      - name: Terraform Init & Apply Addons
+        run: |
+          terraform init
+          terraform apply -auto-approve
