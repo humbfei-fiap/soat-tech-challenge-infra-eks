@@ -17,6 +17,8 @@ jobs:
   terraform-eks:
     name: 'Deploy EKS Cluster'
     runs-on: ubuntu-latest
+    outputs:
+      cluster_name: ${{ steps.get_cluster_name.outputs.cluster_name }}
     
     defaults:
       run:
@@ -51,6 +53,10 @@ jobs:
         id: apply
         run:  terraform apply -target=module.eks -auto-approve
 
+      - name: Get cluster name
+        id: get_cluster_name
+        run: echo "cluster_name=$(terraform output -raw cluster_name)" >> $GITHUB_OUTPUT
+
         # --- JOB 2: Instala os addons ---
   terraform-addons:
     name: 'Deploy Addons'
@@ -63,8 +69,8 @@ jobs:
         working-directory: ./terraform
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
