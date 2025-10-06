@@ -28,3 +28,8 @@ output "nginx_nlb_hostname" {
   description = "O hostname do NLB compartilhado criado pelo NGINX Ingress Controller."
   value       = data.kubernetes_service.nginx_ingress_service.status[0].load_balancer[0].ingress[0].hostname
 }
+
+output "eks_managed_node_group_names" {
+  description = "Os nomes dos grupos de nós gerenciados do EKS."
+  value       = keys(module.eks.eks_managed_node_groups)
+}
