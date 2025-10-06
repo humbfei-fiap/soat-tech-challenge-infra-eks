@@ -1,54 +1,42 @@
-# Define o Deployment do Ingress
-resource "kubernetes_deployment" "ingress_deployment" {
-  metadata {
-    name = "ingress-deployment"
-  }
-  spec {
-    replicas = 2
-    selector {
-      match_labels = {
-        app = "ingress-app"
-      }
-    }
-    template {
-      metadata {
-        labels = {
-          app = "ingress-app"
-        }
-      }
-      spec {
-        container {
-          image = "ealen/echo-server"
-          name  = "ingress-container"
-          port {
-            container_port = 80
-          }
-        }
-      }
-    }
-  }
+
+#==============================================================================
+# NGINX Ingress Controller
+# Instala o NGINX Ingress Controller, que atuará como o roteador central
+# para todos os serviços dentro do cluster.
+#==============================================================================
+resource "helm_release" "nginx_ingress_controller" {
+  name       = "ingress-nginx"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
+  namespace  = "ingress-nginx"
+  create_namespace = true
+  version    = "4.10.0" # Versão estável e recente
+
+  depends_on = [module.eks.access_policy_associations]
+
+  values = [
+    <<-EOT
+controller:
+  service:
+    # As anotações cruciais para criar um NLB INTERNO para o NGINX
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
+EOT
+  ]
 }
 
-# Define o Service do tipo LoadBalancer para expor o Ingress com um NLB
-resource "kubernetes_service" "ingress_service" {
-  depends_on = [helm_release.aws_load_balancer_controller]
+#==============================================================================
+# Data Source para o Serviço do NGINX
+# Usamos este data source para "ler" o serviço que o Helm acabou de criar.
+# Isso nos permite obter o endereço do NLB para usar em outros lugares (como no VPC Link).
+#==============================================================================
+data "kubernetes_service" "nginx_ingress_service" {
+  # Garante que a leitura só aconteça depois que o Helm terminar a instalação
+  depends_on = [helm_release.nginx_ingress_controller]
+
   metadata {
-    name = "ingress-service"
-    annotations = {
-      "service.beta.kubernetes.io/aws-load-balancer-type"           = "external"
-      "service.beta.kubernetes.io/aws-load-balancer-nlb-target-type" = "ip"
-      "service.beta.kubernetes.io/aws-load-balancer-scheme"         = "internet-facing"
-    }
-  }
-  spec {
-    selector = {
-      app = "ingress-app"
-    }
-    port {
-      port        = 80
-      target_port = 80
-      protocol    = "TCP"
-    }
-    type = "LoadBalancer"
+    name      = "ingress-nginx-controller"
+    namespace = "ingress-nginx"
   }
 }

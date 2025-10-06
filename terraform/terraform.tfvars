@@ -29,7 +29,7 @@ create_vpc_link = false
 
 # O hostname DNS do Network Load Balancer (NLB) criado pelo Kubernetes.
 # Exemplo: "k8s-default-ingresss-xxxxxx-yyyyyy.elb.us-east-1.amazonaws.com"
-nlb_hostname = ""
+nlb_hostname = "k8s-default-internal-b7fbed40aa-926b447528d74dbe.elb.us-east-1.amazonaws.com"
 
 
 
