@@ -33,3 +33,13 @@ output "eks_managed_node_group_names" {
   description = "Os nomes dos grupos de nós gerenciados do EKS."
   value       = keys(module.eks.eks_managed_node_groups)
 }
+
+output "cluster_primary_security_group_id" {
+  description = "O ID do security group primário do cluster EKS."
+  value       = module.eks.cluster_primary_security_group_id
+}
+
+output "node_security_group_id" {
+  description = "O ID do security group dos nós do EKS."
+  value       = module.eks.node_security_group_id
+}

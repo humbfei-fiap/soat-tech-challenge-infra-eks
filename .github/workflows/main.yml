@@ -47,9 +47,6 @@ jobs:
         id: plan
         run: terraform plan -out=tfplan
 
-      - name: Debug Verify AWS Identity
-        run: aws sts get-caller-identity
-
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve tfplan
