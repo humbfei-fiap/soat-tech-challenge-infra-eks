@@ -83,6 +83,9 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.8.5
+
+      - name: Update kube config
+        run: aws eks update-kubeconfig --name ${{ needs.terraform-eks.outputs.cluster_name }}
           
       - name: Terraform Init & Apply Addons
         run: |
