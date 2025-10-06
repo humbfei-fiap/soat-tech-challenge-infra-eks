@@ -10,3 +10,4 @@ build/
 tfplan
 *.tfstate
 *.tfstate.backup
+/backend_setup/terraform.tfstate

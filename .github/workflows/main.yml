@@ -53,9 +53,15 @@ jobs:
 
         # --- JOB 2: Instala os addons ---
   terraform-addons:
-    name: 'Deploy EKS Cluster'
+    name: 'Deploy Addons'
     needs: terraform-eks
     runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./terraform
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -70,4 +76,4 @@ jobs:
       - name: Terraform Init & Apply Addons
         run: |
           terraform init
-          terraform apply -auto-approve
+          terraform apply -target=helm_release.nginx_ingress_controller -auto-approve
