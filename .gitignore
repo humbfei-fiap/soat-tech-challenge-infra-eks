@@ -10,3 +10,5 @@ build/
 tfplan
 *.tfstate
 *.tfstate.backup
+**/*.tfstate
+**/*.tfstate.*

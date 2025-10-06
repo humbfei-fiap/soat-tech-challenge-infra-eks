@@ -62,10 +62,15 @@ jobs:
     name: 'Deploy Addons'
     needs: terraform-eks
     runs-on: ubuntu-latest
+    
     defaults:
       run:
         shell: bash
         working-directory: ./terraform
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2d4748a5b4955f6170cce9d3214d51aed68b6f41
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -77,21 +82,8 @@ jobs:
           aws-region: us-east-1
           audience: sts.amazonaws.com
 
-      - name: Configure Kubectl
-        run: aws eks update-kubeconfig --name ${{ needs.terraform-eks.outputs.cluster_name }} --region us-east-1
-      
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.8.5
-
-      - name: Terraform Init
-        id: init
-        run: terraform init
-
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -out=tfplan
-
-      - name: Terraform Apply Addons
-        run: terraform apply -auto-approve
+          
+      - name: Terraform Init & Apply Addons
+        run: |
+          terraform init
+          terraform apply -target=helm_release.nginx_ingress_controller -auto-approve

@@ -36,7 +36,7 @@ jobs:
             gh pr create \
               --base main \
               --head develop \
-              --title ""PR aberto automaticamente: ${{ github.ref_name }} -> to Main" \
+              --title "PR aberto automaticamente: ${{ github.ref_name }} -> to Main" \
               --body "Este PR foi gerado automaticamente após um push na branch develop.
               As mudanças de infraestrutura serão aplicadas na 'AWS' após a aprovação e merge deste PR."
           else
