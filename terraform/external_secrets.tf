@@ -71,6 +71,7 @@ resource "aws_iam_role_policy_attachment" "external_secrets" {
 #------------------------------------------------------------------------------
 # Este recurso gerencia a instalação do chart do Helm.
 resource "helm_release" "external_secrets" {
+  provider   = helm.eks_cluster
   name       = "external-secrets"
   repository = "https://charts.external-secrets.io"
   chart      = "external-secrets"
