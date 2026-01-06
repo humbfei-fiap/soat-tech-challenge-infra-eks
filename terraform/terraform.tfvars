@@ -11,6 +11,7 @@ cluster_version = "1.33"
 vpc_id     = "vpc-8ce247f1"
 subnet_ids = ["subnet-8a652684", "subnet-c3f47da5"]
 
+
 # ===============================================================
 # Configurações do Grupo de Nós (Worker Nodes)
 # ===============================================================
