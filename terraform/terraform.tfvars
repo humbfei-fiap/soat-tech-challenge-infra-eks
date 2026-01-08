@@ -18,8 +18,8 @@ subnet_ids = ["subnet-8a652684", "subnet-c3f47da5"]
 node_group_name       = "ng-primario"
 node_instance_type    = "t3.medium"
 node_desired_capacity = 2
-node_min_capacity     = 1
-node_max_capacity     = 3
+node_min_capacity     = 2
+node_max_capacity     = 5
 
 # ===============================================================
 # Configurações do VPC Link (Opcional)
