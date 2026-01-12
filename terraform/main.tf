@@ -14,6 +14,12 @@ module "eks" {
 
   cluster_endpoint_public_access = true
 
+  cluster_addons = {
+    metrics-server = {
+      most_recent = true
+    }
+  }
+
   access_entries = local.access_entries
   eks_managed_node_groups = {
     (var.node_group_name) = {
